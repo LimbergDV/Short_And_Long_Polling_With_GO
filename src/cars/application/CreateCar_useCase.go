@@ -6,10 +6,10 @@ type CreateCar struct{
 	db domain.ICar
 }
 
-func NewCreateEmployee (db domain.ICar) *CreateCar {
+func NewCreateCar (db domain.ICar) *CreateCar {
 	return &CreateCar{db: db}
 }
 
-func (cc *CreateCar) Run (employee domain.Car) (uint, error) {
-	return cc.db.Save(employee)
+func (cc *CreateCar) Run (car domain.Car) (uint, error) {
+	return cc.db.Save(car)
 }
