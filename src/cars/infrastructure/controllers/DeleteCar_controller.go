@@ -21,13 +21,13 @@ func NewDeleteCarByIdController() *DeleteCarByIdController {
 
 func (ctrl *DeleteCarByIdController) Run(c *gin.Context) {
 	id := c.Param("id")
-	employeeId, err := strconv.Atoi(id)
+	carId, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del carro inválido"})
 		return
 	}
 
-	rowsAffected, _ := ctrl.app.Run(employeeId)
+	rowsAffected, _ := ctrl.app.Run(carId)
 
 	if rowsAffected == 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar el carro"})

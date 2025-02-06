@@ -24,16 +24,16 @@ func NewUpdateCarByIdController() *UpdateCarByIdController {
 
 func (ctrl *UpdateCarByIdController) Run(c *gin.Context) {
 	id := c.Param("id")
-	var employee domain.Car
+	var car domain.Car
 
-	idEmployee, _ := strconv.ParseUint(id, 10, 64)
+	idCar, _ := strconv.ParseUint(id, 10, 64)
 
-	if err := c.ShouldBindJSON(&employee); err != nil {
+	if err := c.ShouldBindJSON(&car); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	rowsAffected, _ := ctrl.app.Run(int(idEmployee), employee)
+	rowsAffected, _ := ctrl.app.Run(int(idCar), car)
 
 	if rowsAffected == 0 {
 		fmt.Println("No se pudo actualizar el carro")
