@@ -21,8 +21,8 @@ func NewMySQL() *MySQL {
 }
 
 func (mysql *MySQL) Save(car domain.Car) (uint, error) {
-	query := "INSERT INTO cars (brand, model, year, type_car, plate_number, price_day) VALUES (?, ?, ?, ?, ?, ?)"
-	res, err := mysql.conn.ExecutePreparedQuery(query, car.Brand, car.Model, car.Year, car.Type_Car, car.Plate_number, car.Price_day)
+	query := "INSERT INTO cars (brand, model, year, type_car, plate_number, price_day, available) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	res, err := mysql.conn.ExecutePreparedQuery(query, car.Brand, car.Model, car.Year, car.Type_Car, car.Plate_number, car.Price_day, car.Available)
 	if err != nil {
 		fmt.Println("Error al preparar la consulta:", err)
 		return 0, err
@@ -45,7 +45,7 @@ func (mysql *MySQL) GetAll() []domain.Car {
 
 	for rows.Next() {
 		var c domain.Car
-		if err := rows.Scan(&c.Id, &c.Brand, &c.Model, &c.Year, &c.Type_Car, &c.Plate_number, &c.Price_day); err != nil {
+		if err := rows.Scan(&c.Id, &c.Brand, &c.Model, &c.Year, &c.Type_Car, &c.Plate_number, &c.Price_day, &c.Available); err != nil {
 			fmt.Println("Error al escanear la fila:", err)
 		} else {
 			cars = append(cars, c)
@@ -76,8 +76,8 @@ func (mysql *MySQL) Delete(id int) (uint, error) {
 }
 
 func (mysql *MySQL) Update(id int, car domain.Car) (uint, error) {
-	query := "UPDATE cars SET brand = ?, model = ?, year = ?, type_car = ?, plate_number = ?, price_day = ? WHERE id = ?"
-	res, err := mysql.conn.ExecutePreparedQuery(query, car.Brand, car.Model, car.Year, car.Type_Car, car.Plate_number, car.Price_day, id)
+	query := "UPDATE cars SET brand = ?, model = ?, year = ?, type_car = ?, plate_number = ?, price_day = ?, available = ? WHERE id = ?"
+	res, err := mysql.conn.ExecutePreparedQuery(query, car.Brand, car.Model, car.Year, car.Type_Car, car.Plate_number, car.Price_day,car.Available , id)
 	if err != nil {
 		fmt.Println("Error al ejecutar la consulta:", err)
 		return 0, err
@@ -93,7 +93,7 @@ func (mysql *MySQL) Update(id int, car domain.Car) (uint, error) {
 func (mysql *MySQL) GetById(id int) (domain.Car, error) {
 	var car domain.Car
 
-	query := "SELECT id, brand, model, year, type_car, plate_number, price_day FROM cars WHERE id = ?"
+	query := "SELECT id, brand, model, year, type_car, plate_number, price_day, available FROM cars WHERE id = ?"
 	rows := mysql.conn.FetchRows(query, id)
 
 	if rows == nil {
@@ -103,7 +103,7 @@ func (mysql *MySQL) GetById(id int) (domain.Car, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&car.Id, &car.Brand, &car.Model, &car.Year, &car.Type_Car, &car.Plate_number, &car.Price_day)
+		err := rows.Scan(&car.Id, &car.Brand, &car.Model, &car.Year, &car.Type_Car, &car.Plate_number, &car.Price_day, &car.Available)
 		if err != nil {
 			return car, err
 		}
