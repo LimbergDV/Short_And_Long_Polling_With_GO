@@ -10,3 +10,7 @@ type Car struct {
 		Price_day int
 		Available bool
 }
+
+type ResponseGetAllCars struct {
+    Data []Car `json:"data"`
+}

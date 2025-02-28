@@ -14,5 +14,7 @@ func Routes (r *gin.Engine) {
 		customersRoutes.GET("/", controllers.NewGetAllCustomersController().Run)
 		customersRoutes.PUT("/:id", controllers.NewUpdateCustomerByIdController().Run)
 		customersRoutes.DELETE("/:id", controllers.NewDeleteCustomerByIdController().Run)
+		customersRoutes.GET("/all", controllers.ShortPollingCustomers)
+		customersRoutes.GET("/all-wait", controllers.LongPollingCustomers)
 	}
 }
