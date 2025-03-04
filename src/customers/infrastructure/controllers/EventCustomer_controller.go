@@ -3,6 +3,8 @@ package controllers
 import (
 	"api_short_long_polling/src/customers/application"
 	"api_short_long_polling/src/customers/infrastructure"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
 	"time"
@@ -10,20 +12,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ShortPollingCustomers responde de forma inmediata con el estado actual de los customers.
+
 func ShortPollingCustomers(c *gin.Context) {
 	mysql := infrastructure.GetMySQL()
 	useCase := application.NewGetAllCustomers(mysql)
-	
-	ticket := time.NewTicker(15 * time.Second)
+	c.Writer.Flush()
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
 
+	for {
+		select {
+		case <-ticker.C:
+			customersData := useCase.Run()
+			// Creamos el mensaje en formato JSON
+			data, err := json.Marshal(gin.H{
+				"message":   "Datos actuales de clientes",
+				"customers": customersData,
+			})
+			if err != nil {
+				fmt.Println("Error formateando JSON:", err)
+				continue
+			}
+			fmt.Fprintf(c.Writer, "data: %s\n\n", data)
+			c.Writer.Flush()
 
-	for range ticket.C {
-		customersData := useCase.Run()
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Datos actuales de clientes",
-			"cars":    customersData,
-		})
+		case <-c.Writer.CloseNotify():
+			return
+		}
 	}
 }
 

@@ -4,27 +4,42 @@ import (
 	"api_short_long_polling/src/cars/application"
 	"api_short_long_polling/src/cars/domain"
 	"api_short_long_polling/src/cars/infrastructure"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-//Aquí en short lo que voy a realizar es la longitud de carros, si cambia la longitud decimos "hay cambios" si no ponemos un no hay cambios
-//y volvemos a realizar la petición
 
 func ShortPollingAvailableCars(c *gin.Context) {
-	mysql := infrastructure.GetMySQL() 
-	useCase := application.NewGetAvailableCars(mysql) 
+	mysql := infrastructure.GetMySQL()
+	useCase := application.NewGetAvailableCars(mysql)
+	c.Writer.Flush()
+	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
 
-	ticket := time.NewTicker(15 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			availableCars := useCase.Run()
+			// Creamos el mensaje en formato JSON
+			data, err := json.Marshal(gin.H{
+				"message": "Datos actuales de disponibilidad",
+				"cars":    availableCars,
+			})
+			if err != nil {
+				fmt.Println("Error al formatear JSON:", err)
+				continue
+			}
 
-	for range ticket.C {
-		availableCars := useCase.Run()
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Datos actuales de disponibilidad",
-			"cars":    availableCars,
-		})
+			fmt.Fprintf(c.Writer, "data: %s\n\n", data)
+			c.Writer.Flush()
+			
+		case <-c.Writer.CloseNotify():
+			return
+		}
 	}
 }
 
